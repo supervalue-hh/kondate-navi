@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日のごはん、何にする？</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  background: #f4f4f2;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 12px 48px;
+  color: #1a1a1a;
+}
+.app {
+  width: 100%;
+  max-width: 480px;
+}
+.sc { display: none; }
+.sc.on { display: block; }
+
+/* header */
+.hd { background: #1a7a4a; border-radius: 14px 14px 0 0; padding: 16px 20px; }
+.hd h1 { color: white; font-size: 19px; font-weight: 500; }
+.hd p { color: rgba(255,255,255,.8); font-size: 12px; margin-top: 3px; }
+.bd {
+  border: 0.5px solid #d8d8d4;
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  background: #fff;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: rgba(255,255,255,.85); cursor: pointer;
+  background: rgba(255,255,255,.15); border: 0.5px solid rgba(255,255,255,.3);
+  border-radius: 8px; padding: 5px 11px; margin-top: 10px;
+}
+
+/* top screen */
+.choices { padding: 18px; display: flex; flex-direction: column; gap: 9px; }
+.ch {
+  border: 0.5px solid #c8c8c4; border-radius: 12px; padding: 16px 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  transition: background .12s;
+}
+.ch:hover { background: #f4f4f2; }
+.ch .bar { width: 4px; height: 42px; border-radius: 2px; flex-shrink: 0; margin-right: 14px; }
+.ch .ct { font-size: 15px; font-weight: 500; }
+.ch .cs { font-size: 12px; color: #666; margin-top: 2px; }
+
+.kn-btn {
+  margin: 0 18px 18px;
+  border: 0.5px solid #ef9f27; border-radius: 12px; padding: 13px 15px;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  background: #faeeda; transition: background .12s;
+}
+.kn-btn:hover { background: #f5deb3; }
+.kn-btn .kl { font-size: 11px; font-weight: 500; color: #854f0b; margin-bottom: 2px; }
+.kn-btn .kt { font-size: 14px; font-weight: 500; color: #633806; }
+.kn-btn .ks { font-size: 12px; color: #854f0b; margin-top: 1px; }
+
+/* recipe list */
+.rl-head {
+  padding: 14px 18px 10px; border-bottom: 0.5px solid #e8e8e4;
+  display: flex; align-items: center; gap: 10px;
+}
+.mode-tag { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 9px; }
+.rl-count { font-size: 13px; color: #666; }
+.rl { list-style: none; }
+.rl li {
+  border-bottom: 0.5px solid #e8e8e4; padding: 12px 18px;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  transition: background .1s;
+}
+.rl li:hover { background: #f9f9f7; }
+.rl li:last-child { border-bottom: none; }
+.rl .rn { font-size: 14px; font-weight: 500; }
+.rl .rm { font-size: 12px; color: #666; margin-top: 2px; }
+
+/* detail */
+.dh { padding: 16px 18px 12px; border-bottom: 0.5px solid #e8e8e4; }
+.kn-flag {
+  background: #faeeda; border: 0.5px solid #ef9f27; color: #854f0b;
+  border-radius: 8px; padding: 7px 11px; font-size: 12px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dn { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+.dm { display: flex; gap: 14px; font-size: 13px; color: #666; flex-wrap: wrap; }
+.dm span { display: flex; align-items: center; gap: 4px; }
+
+.tabs { display: flex; border-bottom: 0.5px solid #e8e8e4; }
+.tab {
+  flex: 1; padding: 10px 6px; text-align: center; font-size: 13px;
+  cursor: pointer; color: #666; border-bottom: 2px solid transparent;
+  transition: color .12s;
+}
+.tab.on { color: #1a7a4a; border-bottom-color: #1a7a4a; font-weight: 500; }
+.panel { display: none; padding: 14px 18px; }
+.panel.on { display: block; }
+
+.it { width: 100%; font-size: 14px; border-collapse: collapse; }
+.it tr { border-bottom: 0.5px solid #e8e8e4; }
+.it tr:last-child { border-bottom: none; }
+.it td { padding: 8px 0; vertical-align: middle; }
+.it .iq { color: #666; font-size: 12px; padding: 0 8px; }
+.it .il { text-align: right; }
+.loc {
+  font-size: 11px; color: #666; background: #f4f4f2;
+  padding: 2px 7px; border-radius: 7px; white-space: nowrap;
+}
+.sd {
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: #1a7a4a; margin-left: 4px; vertical-align: middle;
+}
+.tot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 0; border-top: 0.5px solid #e8e8e4; margin-top: 2px;
+}
+.totv { font-size: 18px; font-weight: 500; color: #1a7a4a; }
+.sale-note { font-size: 12px; color: #666; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+.sl { list-style: none; }
+.sl li {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 0.5px solid #e8e8e4; font-size: 14px; line-height: 1.6;
+}
+.sl li:last-child { border-bottom: none; }
+.sn {
+  width: 21px; height: 21px; border-radius: 50%; background: #1a7a4a;
+  color: white; font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+.btn {
+  width: 100%; padding: 12px; border-radius: 8px;
+  font-size: 14px; font-weight: 500; cursor: pointer; border: none; margin-top: 10px;
+}
+.btn-g { background: #1a7a4a; color: white; }
+.btn-g:hover { background: #155f3a; }
+
+/* kinenbi list */
+.kn-list { list-style: none; }
+.kn-list li {
+  border-bottom: 0.5px solid #e8e8e4; padding: 13px 18px;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  transition: background .1s;
+}
+.kn-list li:hover { background: #f9f9f7; }
+.kn-list li.today { background: #faeeda; }
+.kn-list .knd { font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+.kn-list .knt { font-size: 14px; font-weight: 500; }
+.kn-list .kns { font-size: 12px; color: #666; margin-top: 1px; }
+.today-badge {
+  font-size: 10px; background: #1a7a4a; color: white;
+  padding: 2px 7px; border-radius: 8px; margin-left: 8px; font-weight: 500;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SCREEN 1: トップ -->
+<div class="sc on" id="s1">
+  <div class="hd">
+    <h1>今日のごはん、何にする？</h1>
+    <p>気分で選ぶだけで献立と食材リストを提案します</p>
+  </div>
+  <div class="bd">
+    <div class="choices">
+      <div class="ch" onclick="go('speed')">
+        <div style="display:flex;align-items:center;">
+          <div class="bar" style="background:#378add;"></div>
+          <div><div class="ct">パパっとすませたい</div><div class="cs">15分以内でできる献立</div></div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:#aaa;" aria-hidden="true"></i>
+      </div>
+      <div class="ch" onclick="go('medium')">
+        <div style="display:flex;align-items:center;">
+          <div class="bar" style="background:#1a7a4a;"></div>
+          <div><div class="ct">少しなら手間かけてもいい</div><div class="cs">20〜30分でできる献立</div></div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:#aaa;" aria-hidden="true"></i>
+      </div>
+      <div class="ch" onclick="go('slow')">
+        <div style="display:flex;align-items:center;">
+          <div class="bar" style="background:#ef9f27;"></div>
+          <div><div class="ct">じっくり手間かけてもいい</div><div class="cs">40分〜、煮込みや揚げ物も</div></div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:#aaa;" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="kn-btn" onclick="goKn()">
+      <div>
+        <div class="kl">今日の食の記念日</div>
+        <div class="kt" id="kn-top-title">いなりの日（毎月17日）</div>
+        <div class="ks" id="kn-top-sub">お稲荷さん・油揚げを使った料理を提案します</div>
+      </div>
+      <i class="ti ti-chevron-right" style="color:#854f0b;font-size:16px;" aria-hidden="true"></i>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: 献立一覧 -->
+<div class="sc" id="s2">
+  <div class="hd">
+    <h1 id="s2t">献立一覧</h1>
+    <div class="back" onclick="show('s1')"><i class="ti ti-arrow-left" aria-hidden="true"></i> 選び直す</div>
+  </div>
+  <div class="bd">
+    <div class="rl-head">
+      <span class="mode-tag" id="s2tag"></span>
+      <span class="rl-count" id="s2cnt"></span>
+    </div>
+    <ul class="rl" id="rlist"></ul>
+  </div>
+</div>
+
+<!-- SCREEN 3: 献立詳細 -->
+<div class="sc" id="s3">
+  <div class="hd">
+    <h1 id="s3t">献立の詳細</h1>
+    <div class="back" onclick="show('s2')"><i class="ti ti-arrow-left" aria-hidden="true"></i> 一覧に戻る</div>
+  </div>
+  <div class="bd">
+    <div class="dh">
+      <div id="kn-flag2" class="kn-flag" style="display:none;">
+        <i class="ti ti-calendar-event" style="font-size:14px;" aria-hidden="true"></i>
+        <span id="kn-flag2-txt"></span>
+      </div>
+      <div class="dn" id="dn"></div>
+      <div class="dm">
+        <span><i class="ti ti-clock" style="font-size:13px;" aria-hidden="true"></i><span id="dt"></span></span>
+        <span><i class="ti ti-chart-bar" style="font-size:13px;" aria-hidden="true"></i><span id="dd"></span></span>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab on" id="tb0" onclick="stab(0)">食材リスト</div>
+      <div class="tab" id="tb1" onclick="stab(1)">作り方</div>
+    </div>
+    <div class="panel on" id="p0">
+      <table class="it"><tbody id="itb"></tbody></table>
+      <div class="sale-note" id="salenote" style="display:none;">
+        <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#1a7a4a;"></span>
+        本日の特売品
+      </div>
+      <div class="tot">
+        <span style="font-size:13px;color:#666;">目安合計（税込）</span>
+        <span class="totv" id="totv"></span>
+      </div>
+    </div>
+    <div class="panel" id="p1">
+      <ol class="sl" id="slb"></ol>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: 記念日カレンダー -->
+<div class="sc" id="s4">
+  <div class="hd">
+    <h1>食の記念日カレンダー</h1>
+    <div class="back" onclick="show('s1')"><i class="ti ti-arrow-left" aria-hidden="true"></i> トップに戻る</div>
+  </div>
+  <div class="bd">
+    <ul class="kn-list" id="knlist"></ul>
+  </div>
+</div>
+
+</div><!-- .app -->
+
+<script>
+var TODAY = new Date();
+
+var RDB = {
+speed:[
+['豚肉と野菜の味噌炒め','15分','易しい',[['豚こま肉','150g',178,'精肉①'],['キャベツ','1/4玉',88,'野菜②'],['もやし','1袋',38,'野菜②',1],['合わせ味噌ダレ','各適量',0,'自宅']],['豚肉とキャベツを食べやすく切る','フライパンに油を熱し豚肉を炒める','キャベツ・もやしを加えてしんなりするまで炒める','味噌・みりん・砂糖を合わせたタレを回しかけて絡めて完成']],
+['親子丼','15分','易しい',[['鶏もも肉','1枚',228,'精肉①'],['卵','3個',78,'卵⑥'],['玉ねぎ','1/2個',58,'野菜②'],['めんつゆ・砂糖','各適量',148,'調味料⑦']],['鶏肉と玉ねぎを切る','小鍋にめんつゆ・砂糖・水を合わせ鶏肉と玉ねぎを煮る','半熟手前に溶き卵を回し入れフタをして10秒で火を止める','ご飯に盛り三つ葉などを乗せて完成']],
+['麻婆豆腐','15分','易しい',[['絹ごし豆腐','1丁',78,'豆腐④',1],['豚ひき肉','100g',148,'精肉①'],['麻婆豆腐の素','1袋',198,'調味料⑦'],['長ねぎ','1/2本',68,'野菜②']],['豆腐を2cm角に切りレンジで2分加熱して水切り','フライパンでひき肉を炒める','豆腐と麻婆の素を加えて混ぜながら2分加熱','刻みねぎを散らして完成']],
+['焼きそば','12分','易しい',[['焼きそば麺','2玉',128,'麺類⑧'],['豚こま肉','100g',148,'精肉①'],['キャベツ・もやし','各適量',98,'野菜②'],['ウスターソース・醤油','各適量',0,'自宅']],['野菜と肉を切る','フライパンに油を熱し肉を炒める','野菜を加えて炒め麺を加える','ソースと醤油で味付けして完成']],
+['チャーハン','12分','普通',[['ご飯（冷やご飯可）','2膳分',0,'自宅'],['卵','2個',58,'卵⑥'],['長ねぎ','1/3本',48,'野菜②'],['焼き豚・ハム','50g',128,'惣菜⑩']],['具材をすべて小さく切る','強火でフライパンを熱しサラダ油を馴染ませる','溶き卵を入れてすぐご飯を加えてほぐす','具を加え醤油・塩こしょうで味付けして完成']],
+['卵とほうれん草の炒め物','10分','易しい',[['卵','3個',78,'卵⑥'],['ほうれん草','1束',98,'野菜②'],['にんにく','1かけ',48,'野菜②'],['醤油','少々',0,'自宅']],['ほうれん草を3cm幅に切り卵を溶く','フライパンにみじん切りにんにくと油を熱する','ほうれん草を強火で炒める','溶き卵を加えてざっくり混ぜ醤油で味付け']],
+['そぼろご飯','15分','易しい',[['鶏ひき肉','150g',158,'精肉①'],['卵','2個',58,'卵⑥'],['いんげん（茹で）','適量',88,'野菜②'],['醤油・みりん・砂糖・酒','各大さじ1',0,'自宅']],['フライパンでひき肉を炒めて醤油・みりん・砂糖で甘辛く煮詰める','別のフライパンで炒り卵を作る','いんげんを茹でて小口切りにする','ご飯の上に3色盛り付けて完成']],
+['冷奴と豚しゃぶのポン酢がけ','12分','易しい',[['豚しゃぶ用肉','150g',198,'精肉①'],['絹ごし豆腐','1丁',78,'豆腐④',1],['大葉・長ねぎ','各適量',88,'野菜②'],['ポン酢','適量',148,'調味料⑦']],['湯を沸かし豚肉をさっとゆでる','豆腐を水切りして器に盛る','ゆでた豚肉を豆腐の上にのせる','大葉・刻みねぎを散らしポン酢をかけて完成']],
+['なめたけおろしそば','10分','易しい',[['そば（ゆで）','2玉',138,'麺類⑧'],['大根','5cm',78,'野菜②'],['なめたけ（瓶）','適量',148,'瓶詰⑧'],['めんつゆ','適量',168,'調味料⑦']],['そばをパッケージ通りに茹でて冷水でしめる','大根をすりおろす','器にそばを盛り大根おろし・なめたけをのせる','めんつゆを好みの濃さで注いで完成']],
+['明太子パスタ','12分','易しい',[['スパゲッティ','160g',148,'麺類⑧'],['明太子','1腹',198,'鮮魚③'],['バター','10g',48,'乳製品⑥'],['大葉・海苔','各適量',88,'乾物⑧']],['スパゲッティを茹でる','明太子をほぐしバターと混ぜる','茹で上がったパスタを加えて和える','大葉と海苔を散らして完成']],
+['冷やしうどん','8分','易しい',[['うどん（冷凍）','2玉',148,'冷凍⑨'],['めんつゆ','適量',168,'調味料⑦'],['長ねぎ・しょうが','各適量',68,'野菜②'],['天かす・わかめ','各適量',98,'乾物⑧']],['冷凍うどんを電子レンジか茹でて解凍する','冷水でしめてよく水切り','器に盛りめんつゆを注ぐ','長ねぎ・しょうが・天かす・わかめをのせて完成']],
+['豆腐チャンプルー','15分','普通',[['木綿豆腐','1丁',78,'豆腐④'],['豚バラ薄切り','100g',168,'精肉①'],['もやし','1袋',38,'野菜②',1],['卵','2個',58,'卵⑥']],['豆腐を手でちぎりキッチンペーパーで水切り','豚肉を炒め豆腐を加えて焼き目をつける','もやしを加えてさっと炒める','溶き卵を回し入れて醤油・かつおぶしで味付け']],
+['ツナと大根のさっぱりサラダ丼','12分','易しい',[['ツナ缶','1缶',148,'缶詰⑧'],['大根','1/5本',68,'野菜②'],['水菜','1/4袋',68,'野菜②'],['ポン酢・ごま油','各適量',98,'調味料⑦']],['大根と水菜を細切りにする','ツナ缶の油を切る','ご飯に盛り付けて大根・水菜・ツナをのせる','ポン酢とごま油をかけて完成']],
+['キャベツと豚肉の塩炒め','12分','易しい',[['豚こま肉','120g',148,'精肉①'],['キャベツ','1/4玉',88,'野菜②'],['にんにく','1かけ',48,'野菜②'],['鶏ガラスープの素・塩こしょう','各適量',0,'自宅']],['キャベツをざく切りにんにくをみじん切り','フライパンでにんにくを熱し豚肉を炒める','キャベツを加えて強火で炒める','鶏ガラスープの素・塩こしょうで味付けして完成']],
+['温玉のせぶっかけうどん','10分','易しい',[['うどん（冷凍）','2玉',148,'冷凍⑨'],['温泉卵','2個',98,'卵⑥'],['天かす・めんつゆ','各適量',168,'調味料⑦'],['長ねぎ・大根おろし','各適量',78,'野菜②']],['冷凍うどんを解凍して器に盛る','めんつゆを濃いめに注ぐ','温泉卵・大根おろし・天かす・ねぎをのせる','よく混ぜて食べる']],
+['たまごスープ定食','12分','易しい',[['卵','2個',58,'卵⑥'],['長ねぎ','1/2本',68,'野菜②'],['中華だし','小さじ1',98,'調味料⑦'],['焼き海苔・梅干し','各適量',128,'乾物⑧']],['水400mlと中華だしを沸かす','溶き卵をゆっくり回し入れてふんわり仕上げ','刻みねぎを散らす','ご飯に焼き海苔と梅干しをそえて定食に']],
+],
+medium:[
+['豚の生姜焼き','20分','普通',[['豚ロース薄切り','200g',248,'精肉①'],['玉ねぎ','1/2個',68,'野菜②'],['しょうが','1かけ',48,'野菜②'],['醤油・みりん・酒','各大さじ1',0,'自宅']],['豚肉の水気をとる','しょうがをすりおろし醤油・みりん・酒と合わせる','フライパンで豚肉を両面焼き玉ねぎを加える','タレを回しかけて全体に絡めて完成']],
+['鶏の照り焼き','25分','普通',[['鶏もも肉','2枚',348,'精肉①',1],['醤油・みりん・砂糖','各大さじ2',0,'自宅'],['酒','大さじ1',0,'自宅']],['鶏もも肉の厚い部分に切り込みを入れる','フライパンに油なしで皮目を下にして中火で焼く','皮がこんがりしたら裏返してフタをして7分蒸し焼き','醤油・みりん・砂糖を加えて絡め照りが出たら完成']],
+['鮭のムニエル','20分','普通',[['生鮭','2切',298,'鮮魚③'],['バター','15g',68,'乳製品⑥'],['レモン','1/2個',68,'野菜②'],['小麦粉','適量',0,'自宅']],['鮭に塩こしょうして10分置き水気をふく','鮭の両面に薄く小麦粉をまぶす','フライパンにバターを熱し中火で4分焼く','裏返してさらに4分レモン汁をかけて完成']],
+['回鍋肉','20分','普通',[['豚バラかたまり','200g',228,'精肉①'],['キャベツ','1/4玉',88,'野菜②'],['ピーマン','2個',68,'野菜②'],['甜麺醤・豆板醤','各適量',198,'調味料⑦']],['豚バラをかたまりのまま茹でて1cm厚に切る','キャベツをざく切りピーマンを一口大に切る','フライパンで豚肉を炒めて香りを出す','野菜を加えて炒め甜麺醤・豆板醤で味付け']],
+['青椒肉絲','25分','普通',[['豚こま肉','150g',178,'精肉①'],['ピーマン','4個',108,'野菜②'],['たけのこ（水煮）','1袋',148,'野菜②'],['醤油・オイスターソース・酒','各適量',0,'自宅']],['豚肉を細切りにして下味をつける','ピーマンとたけのこを細切りにする','フライパンで豚肉を炒め取り出す','野菜を炒めて豚肉を戻しオイスターソースで味付け']],
+['餃子（市販皮使用）','30分','普通',[['餃子の皮','30枚',168,'麺類⑧'],['豚ひき肉','150g',178,'精肉①'],['キャベツ・ニラ','各適量',148,'野菜②'],['醤油・ごま油・にんにく・しょうが','各適量',0,'自宅']],['キャベツ・ニラを細かく刻んで塩もみして水気を絞る','ひき肉と野菜・調味料をよく混ぜる','皮に包んで半月形に成形する','フライパンに並べて焼き蒸らして完成']],
+['さばの味噌煮','25分','普通',[['さば','2切',248,'鮮魚③'],['しょうが','1かけ',48,'野菜②'],['みりん・醤油・砂糖・酒','各適量',0,'自宅'],['味噌','大さじ2',0,'自宅']],['さばに熱湯をかけて臭みを取る','鍋に調味料・しょうが・水を合わせ沸かす','さばを加えて落とし蓋をして中火で10分煮る','味噌を溶き入れてさらに5分煮て完成']],
+['豚キムチ炒め','15分','易しい',[['豚こま肉','150g',178,'精肉①'],['白菜キムチ','150g',198,'漬物⑤'],['木綿豆腐','1/2丁',48,'豆腐④'],['ごま油・醤油','各適量',0,'自宅']],['豆腐を水切りして豚肉を炒める','キムチを加えてさらに炒める','豆腐を手でちぎり加える','ごま油と醤油で味をととのえて完成']],
+['オムライス','25分','普通',[['卵','3個',78,'卵⑥'],['ご飯','2膳分',0,'自宅'],['鶏もも肉','100g',168,'精肉①'],['トマトケチャップ','大さじ3',0,'自宅']],['鶏肉を炒めケチャップとご飯を加えてチキンライスを作る','溶き卵をフライパンに広げる','半熟のうちにチキンライスをのせて包む','皿にひっくり返してケチャップをかけて完成']],
+['ナポリタン','20分','普通',[['スパゲッティ','160g',148,'麺類⑧'],['ウインナー','4本',168,'加工肉⑩'],['玉ねぎ・ピーマン','各適量',98,'野菜②'],['トマトケチャップ・ウスターソース','各適量',0,'自宅']],['スパゲッティを茹でる（少し固めに）','フライパンでウインナーと野菜を炒める','茹でたスパゲッティを加えてケチャップ・ウスターソースで炒める','バターをひとかけら加えてコクを出し完成']],
+['アジの塩焼き','20分','普通',[['アジ','2尾',298,'鮮魚③'],['大根','3cm',78,'野菜②'],['レモン','1/2個',68,'野菜②']],['アジに塩をふって15分置きキッチンペーパーで水気をふく','魚焼きグリルを予熱する','グリルで両面を7〜8分焼く','大根おろしとレモンをそえて完成']],
+['エビチリ','20分','やや難',[['えび（むき）','200g',298,'鮮魚③'],['長ねぎ','1/2本',68,'野菜②'],['豆板醤・ケチャップ','各適量',198,'調味料⑦'],['片栗粉','適量',0,'自宅']],['えびに塩・片栗粉をもみ込んで洗い水気をとる','フライパンでねぎと豆板醤を炒めて香りを出す','えびを加えてケチャップ・チリソースで味付け','水溶き片栗粉でとろみをつけて完成']],
+['鶏むね肉の甘酢炒め','20分','普通',[['鶏むね肉','1枚',228,'精肉①'],['玉ねぎ・パプリカ','各適量',148,'野菜②'],['酢・砂糖・醤油・ケチャップ','各適量',0,'自宅'],['片栗粉','適量',0,'自宅']],['鶏むね肉を一口大に切り片栗粉をまぶす','フライパンで鶏肉を揚げ焼きにする','玉ねぎ・パプリカを加えて炒める','甘酢ダレを加えて全体に絡めて完成']],
+['豚汁','25分','普通',[['豚こま肉','100g',148,'精肉①'],['大根・にんじん・ごぼう','各適量',178,'野菜②'],['こんにゃく','1/2枚',68,'豆腐④'],['味噌','大さじ3',0,'自宅']],['根菜を切りごぼうはアク抜き','鍋に油を熱し豚肉を炒める','根菜とこんにゃくを加えてだし汁で10分煮る','火を弱めて味噌を溶き入れて完成']],
+['ハンバーグ','30分','普通',[['合いびき肉','250g',298,'精肉①'],['玉ねぎ','1/2個',68,'野菜②'],['卵・パン粉・牛乳','各適量',0,'自宅'],['デミグラスソース缶','1缶',148,'缶詰⑧']],['玉ねぎを炒めて冷ます','ひき肉・玉ねぎ・卵・パン粉・牛乳をよく混ぜ成形','フライパンで両面焼き色をつけてフタをして蒸し焼き7分','デミグラスソースを加えて絡めて完成']],
+['ぶり照り','20分','普通',[['ぶり','2切',298,'鮮魚③'],['醤油・みりん・酒・砂糖','各大さじ1',0,'自宅']],['ぶりの水気をふいて塩をふり10分置く','フライパンに油を熱しぶりを皮目から焼く','両面焼いたらタレを加えて絡める','照りが出たら完成']],
+],
+slow:[
+['肉じゃが','45分','普通',[['牛こま肉','150g',228,'精肉①'],['じゃがいも','3個',148,'野菜②'],['玉ねぎ','1個',68,'野菜②'],['にんじん','1本',68,'野菜②']],['じゃがいもを乱切り玉ねぎをくし切りにんじんを乱切り','鍋に油を熱し牛肉を炒め野菜を加える','水と醤油・みりん・砂糖・酒を加えて中火','アクをとり弱火で20分汁気がほぼなくなるまで煮る']],
+['鶏のから揚げ','40分','普通',[['鶏もも肉','2枚',348,'精肉①',1],['醤油・酒・みりん','各大さじ2',0,'自宅'],['にんにく・しょうが','各1かけ',98,'野菜②'],['片栗粉','適量',0,'自宅']],['鶏もも肉を一口大に切り漬けダレに30分漬ける','油を170℃に熱する','肉に片栗粉をまぶして油に入れ4分揚げる','一度取り出して休ませ190℃で再度30秒揚げてカリッと仕上げ']],
+['筑前煮','50分','やや難',[['鶏もも肉','200g',278,'精肉①'],['れんこん・ごぼう・にんじん','各適量',228,'野菜②'],['こんにゃく・干ししいたけ','各適量',148,'豆腐・乾物④⑧'],['醤油・みりん・砂糖・酒','各適量',0,'自宅']],['干ししいたけを30分水で戻す','根菜を乱切りこんにゃくをちぎる','鍋で鶏肉を炒め根菜を加えしいたけの戻し汁と調味料を加える','落とし蓋をして弱火で20分汁気を飛ばして完成']],
+['ぶり大根','50分','普通',[['ぶり','2切',298,'鮮魚③'],['大根','1/2本',148,'野菜②'],['しょうが','1かけ',48,'野菜②'],['醤油・みりん・砂糖・酒','各大さじ2',0,'自宅']],['大根を半月切りにして下茹で15分','ぶりに熱湯をかけて臭みを取る','鍋に調味料・水・しょうがを合わせ煮立てる','大根とぶりを入れ落とし蓋をして弱火20分']],
+['カレーライス','60分','易しい',[['鶏もも肉','250g',298,'精肉①',1],['じゃがいも・にんじん・玉ねぎ','各適量',148,'野菜②'],['カレールー','1/2箱',198,'調味料⑦']],['野菜と肉を一口大に切る','鍋に油を熱し玉ねぎを飴色になるまで10分炒める','肉と野菜を加えて炒め水を加えて20分煮込む','火を止めてルーを溶かし再度5分煮て完成']],
+['豚の角煮','90分','やや難',[['豚バラかたまり','400g',498,'精肉①'],['しょうが','2かけ',68,'野菜②'],['醤油・みりん・砂糖・酒','各大さじ3',0,'自宅']],['豚バラを5cm角に切り下茹で1時間','ゆで汁を捨てて新しい水で洗う','醤油・みりん・砂糖・酒・水を合わせて中火で30分煮る','落とし蓋をして弱火で20分さらに煮込む']],
+['ロールキャベツ','60分','やや難',[['キャベツ','6枚',88,'野菜②'],['合いびき肉','200g',248,'精肉①'],['玉ねぎ','1/2個',68,'野菜②'],['コンソメ','2個',0,'自宅']],['キャベツをゆでて柔らかくする','ひき肉と炒めた玉ねぎを混ぜて成形','キャベツで巻いて爪楊枝でとめる','コンソメスープで弱火30分煮て完成']],
+['ビーフシチュー','80分','普通',[['牛すね肉・牛こま','300g',398,'精肉①'],['じゃがいも・にんじん・玉ねぎ','各適量',148,'野菜②'],['シチューのルー','1/2箱',198,'調味料⑦'],['赤ワイン','大さじ3',148,'酒類⑩']],['玉ねぎを飴色になるまで炒める','牛肉を加えて赤ワインで炒め煮する','水と野菜を加えて40分煮込む','ルーを溶かしてさらに10分煮て完成']],
+['煮込みハンバーグ','60分','普通',[['合いびき肉','300g',348,'精肉①'],['玉ねぎ','1個',88,'野菜②'],['デミグラスソース缶','1缶',148,'缶詰⑧'],['赤ワイン','大さじ2',148,'酒類⑩']],['玉ねぎを炒めてひき肉と混ぜ成形して焼く','鍋にデミグラスソース・赤ワイン・水を合わせる','ハンバーグを加えて弱火で30分煮込む','ソースにとろみが出たら完成']],
+['鶏手羽元のさっぱり煮','50分','易しい',[['鶏手羽元','8本',298,'精肉①'],['酢・醤油・砂糖・みりん','各大さじ3',0,'自宅'],['にんにく','3かけ',98,'野菜②'],['ゆで卵','2個',78,'卵⑥']],['鍋に全材料と調味料を入れて中火','沸騰したらアクをとり弱火にする','フタをして30分煮込む','汁気を少し飛ばして照りを出して完成']],
+['おでん','60分','易しい',[['おでんセット（市販）','1袋',398,'惣菜⑩'],['大根','1/3本',148,'野菜②'],['卵','3個',78,'卵⑥'],['おでんのつゆ（顆粒）','1袋',148,'調味料⑦']],['大根を下茹でし卵をゆでる','鍋に水とつゆを合わせ沸かす','大根・卵・おでんの種を加える','弱火で40分以上じっくり煮込む']],
+['豚バラ大根の煮物','45分','普通',[['豚バラ薄切り','200g',228,'精肉①'],['大根','1/2本',148,'野菜②'],['醤油・みりん・砂糖','各大さじ2',0,'自宅'],['だし汁','400ml',0,'自宅']],['大根を2cm厚に切り下茹で10分','豚バラを食べやすく切り炒める','大根を加えてだし汁と調味料を入れ中火','落とし蓋をして弱火で20分汁気を飛ばす']],
+['牛すじの味噌煮込み','90分','やや難',[['牛すじ肉','300g',348,'精肉①'],['大根・こんにゃく','各適量',148,'野菜②・豆腐④'],['味噌・みりん・砂糖','各適量',0,'自宅'],['長ねぎ・しょうが','各適量',78,'野菜②']],['牛すじを下茹でしてアク抜き','根菜・こんにゃくを切る','圧力鍋に全材料を入れて20分加圧（通常鍋なら1時間）','圧が抜けたら味噌を溶き入れ5分煮て完成']],
+['鮭のちゃんちゃん焼き','40分','普通',[['生鮭','2切',298,'鮮魚③'],['キャベツ','1/4玉',88,'野菜②'],['にんじん・玉ねぎ','各適量',118,'野菜②'],['味噌・みりん・バター','各適量',68,'調味料⑦・乳製品⑥']],['野菜を食べやすく切る','アルミホイルに野菜を敷き鮭をのせる','味噌・みりんを合わせたソースをかけバターをのせる','包んでフライパンで蒸し焼き15分']],
+['栗ごはん','50分','普通',[['栗（生または瓶）','200g',298,'野菜②または瓶詰⑧'],['米','2合',128,'米⑨'],['酒・塩','各適量',0,'自宅']],['生栗の場合は皮をむいて水にさらす30分','米を洗い浸水20分','炊飯器に米・栗・酒・塩を入れて炊飯','炊き上がったら混ぜて完成']],
+],
+};
+
+var MONTHLY=[
+{day:1,name:'あずきの日',desc:'毎月1日 ｜ 小豆のある暮らしを大切にする日',c:'#fbeaf0',tc:'#4b1528',bc:'#ed93b1',
+recipes:[['あずきご飯（赤飯風）','50分','普通',[['もち米','1合',148,'米⑨'],['ゆで小豆缶','1缶',198,'缶詰⑧'],['米','1合',128,'米⑨'],['塩','少々',0,'自宅']],['もち米と米を混ぜて洗い浸水30分','炊飯器に米とゆで小豆・小豆のゆで汁を入れる','水の量を調節して塩をひとつまみ加えて炊く','炊き上がったらさっくり混ぜて完成']],
+['おしるこ','20分','易しい',[['ゆで小豆缶','1缶',198,'缶詰⑧'],['切り餅','4個',198,'餅⑨'],['塩','ひとつまみ',0,'自宅']],['餅をトースターで焼いて膨らませる','鍋にゆで小豆と水200mlを入れて温める','塩ひとつまみで味をととのえる','器に焼き餅を盛りおしるこを注いで完成']]]},
+{day:10,name:'豆腐の日',desc:'毎月10日 ｜ とう(10)ふの語呂合わせ',c:'#e6f1fb',tc:'#042c53',bc:'#85b7eb',
+recipes:[['揚げ出し豆腐','25分','普通',[['木綿豆腐','1丁',88,'豆腐④',1],['だし・醤油・みりん','各適量',0,'自宅'],['片栗粉','適量',0,'自宅'],['大根おろし・しょうが','各適量',78,'野菜②']],['豆腐を8等分に切りキッチンペーパーで水切り30分','片栗粉をまぶして170℃の油で揚げる','だし・醤油・みりんを合わせてつゆを作る','器に揚げ出し豆腐を盛りつゆをかけ大根おろしをのせる']],
+['麻婆豆腐','15分','易しい',[['絹ごし豆腐','1丁',78,'豆腐④',1],['豚ひき肉','100g',148,'精肉①'],['麻婆豆腐の素','1袋',198,'調味料⑦'],['長ねぎ','1/2本',68,'野菜②']],['豆腐を切りレンジで2分加熱して水切り','フライパンでひき肉を炒める','豆腐と麻婆の素を加えて2分加熱','刻みねぎを散らして完成']],
+['冷奴','5分','易しい',[['絹ごし豆腐','1丁',78,'豆腐④',1],['しょうが・ねぎ','各適量',68,'野菜②'],['かつおぶし','ひとつまみ',0,'自宅'],['醤油','適量',0,'自宅']],['豆腐を器に盛る','しょうがをすりおろしねぎを刻む','豆腐の上にかつおぶし・しょうが・ねぎをのせる','醤油をかけて完成']]]},
+{day:17,name:'いなりの日',desc:'毎月17日 ｜ い(1)な(7)りの語呂合わせ',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['いなり寿司','35分','普通',[['油揚げ（いなり用）','6枚',148,'豆腐④',1],['米','2合',128,'米⑨',1],['寿司酢','50ml',148,'調味料⑦'],['白ごま','大さじ1',88,'調味料⑦']],['米を炊き寿司酢・白ごまを混ぜ酢飯を作る','油揚げを半分に切り袋状に開く','だし・醤油・みりん・砂糖で甘辛く10分煮る','汁気を絞り酢飯を詰めて形を整える']],
+['炊き込みご飯（油揚げと鶏肉）','50分','易しい',[['油揚げ','2枚',88,'豆腐④',1],['鶏もも肉','100g',178,'精肉①'],['ごぼう・にんじん','各適量',128,'野菜②'],['醤油・みりん・酒・だし','各適量',0,'自宅']],['米を洗い浸水30分','具材を細かく切り油揚げは油抜きして細切り','調味料と水を合わせて炊飯器に入れる','具材をのせて炊飯し炊き上がったら混ぜる']],
+['お揚げとねぎの味噌汁','10分','易しい',[['油揚げ','1枚',68,'豆腐④',1],['長ねぎ','1/2本',68,'野菜②'],['だし（顆粒）','小さじ1',0,'自宅'],['味噌','大さじ2',0,'自宅']],['油揚げを油抜きして細切りにする','ねぎを小口切りにする','鍋にだし汁を沸かし油揚げとねぎを2分煮る','火を弱めて味噌を溶き入れて完成']]]},
+{day:22,name:'ショートケーキの日',desc:'毎月22日 ｜ カレンダーの22日の上の15日＝いちごにちなむ',c:'#fbeaf0',tc:'#4b1528',bc:'#ed93b1',
+recipes:[['いちごミルク寒天','20分','易しい',[['いちご','1パック',298,'果物②'],['牛乳','300ml',168,'乳製品⑥'],['砂糖','大さじ3',0,'自宅'],['粉寒天','4g',98,'乾物⑧']],['牛乳と粉寒天・砂糖を鍋で加熱して溶かす','型に流して冷蔵庫で1時間固める','いちごを飾り切りにする','固まった寒天に飾り切りいちごをのせて完成']]]},
+{day:29,name:'肉の日',desc:'毎月29日 ｜ に(2)く(9)の語呂合わせ',c:'#fcebeb',tc:'#501313',bc:'#f09595',
+recipes:[['牛すき焼き風煮物','30分','普通',[['牛バラ薄切り','200g',398,'精肉①',1],['焼き豆腐','1丁',98,'豆腐④'],['ねぎ・しらたき','各適量',148,'野菜②・乾物⑧'],['すき焼きのたれ','適量',198,'調味料⑦']],['ねぎを斜め切りにしらたきをアク抜き','フライパンで牛肉を炒めて香りを出す','野菜・豆腐・しらたきを加えてすき焼きのたれを加える','弱火で5分煮て完成']],
+['焼き肉丼','15分','易しい',[['牛こま肉','150g',298,'精肉①',1],['玉ねぎ','1/2個',68,'野菜②'],['焼き肉のタレ','大さじ3',148,'調味料⑦'],['ご飯','2膳分',0,'自宅']],['玉ねぎを薄切りにする','フライパンで牛肉と玉ねぎを炒める','焼き肉のタレを加えて絡める','ご飯にのせて完成']]]},
+{day:30,name:'味噌の日',desc:'毎月30日 ｜ 味噌の普及を目的に制定',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['豚汁','25分','普通',[['豚こま肉','100g',148,'精肉①'],['大根・にんじん・ごぼう','各適量',178,'野菜②'],['こんにゃく','1/2枚',68,'豆腐④'],['味噌','大さじ3',0,'自宅']],['根菜を切りごぼうはアク抜き','鍋で豚肉を炒め野菜を加えてだし汁で10分煮る','火を弱めて味噌を溶き入れ完成']],
+['なすの味噌炒め','15分','易しい',[['なす','3本',148,'野菜②'],['豚こま肉','100g',148,'精肉①'],['味噌・みりん・砂糖','各適量',0,'自宅'],['しょうが','1かけ',48,'野菜②']],['なすを乱切りに豚肉を切る','フライパンで豚肉を炒める','なすを加えて炒め味噌ダレを絡めて完成']]]}
+];
+
+var ANNUAL=[
+{month:1,day:7,name:'七草の日',desc:'1月7日 ｜ 七草がゆで一年の無病息災を願う',c:'#eaf3de',tc:'#173404',bc:'#97c459',
+recipes:[['七草がゆ','40分','易しい',[['春の七草セット','1袋',198,'野菜②'],['米','1合',128,'米⑨'],['塩','少々',0,'自宅']],['米をよく洗い土鍋に入れ水700mlで炊く','七草を洗い塩ゆでして1cm幅に切る','おかゆが炊き上がったら七草を加える','塩で味をととのえて完成']]]},
+{month:2,day:3,name:'節分・恵方巻き',desc:'2月3日 ｜ 今年の恵方を向いて巻き寿司をかぶりつく',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['恵方巻き','50分','普通',[['海苔（全形）','4枚',198,'乾物⑧'],['米','2合',128,'米⑨'],['まぐろ・サーモン・エビ','各適量',398,'鮮魚③'],['きゅうり・卵焼き','各適量',148,'野菜②・卵⑥']],['酢飯を作る','海苔の上に酢飯を広げ具を並べる','手前からしっかり巻いて形を整える','切らずにそのまま恵方を向いてかぶりつく']]]},
+{month:3,day:3,name:'ひな祭り',desc:'3月3日 ｜ ちらし寿司・はまぐりのお吸い物でお祝い',c:'#fbeaf0',tc:'#4b1528',bc:'#ed93b1',
+recipes:[['ちらし寿司','50分','普通',[['米','2合',128,'米⑨'],['刺身盛り合わせ','1パック',498,'鮮魚③'],['れんこん・絹さや','各適量',148,'野菜②'],['錦糸卵・いくら','各適量',198,'卵⑥・鮮魚③']],['酢飯を作る','れんこんを甘酢漬けにする','大きな器に酢飯を広げ具材を色よく盛り付ける','錦糸卵・いくら・絹さやを飾り完成']]]},
+{month:5,day:5,name:'こどもの日',desc:'5月5日 ｜ たけのこご飯・柏餅でお祝い',c:'#eaf3de',tc:'#173404',bc:'#97c459',
+recipes:[['たけのこご飯','50分','普通',[['たけのこ（水煮）','1袋',198,'野菜②'],['米','2合',128,'米⑨'],['油揚げ','1枚',78,'豆腐④'],['醤油・みりん・酒・だし','各適量',0,'自宅']],['米を洗い浸水30分','たけのこを薄切り油揚げを細切り','調味料と水を合わせて炊飯器に入れ具をのせて炊く','炊き上がったらさっくり混ぜて完成']]]},
+{month:7,day:7,name:'七夕・そうめんの日',desc:'7月7日 ｜ 天の川に見立てたそうめんを食べる風習',c:'#e6f1fb',tc:'#042c53',bc:'#85b7eb',
+recipes:[['冷やしそうめん','10分','易しい',[['そうめん','3束',148,'麺類⑧'],['めんつゆ','適量',168,'調味料⑦'],['錦糸卵・きゅうり・トマト','各適量',148,'野菜②・卵⑥']],['そうめんを茹でて冷水でしめる','錦糸卵を作りきゅうりを千切りにする','器にそうめんを盛り彩りよく具をのせる','めんつゆを注いで完成']]]},
+{month:7,day:19,name:'土用の丑の日（2026年）',desc:'7月19日・7月31日 ｜ 夏を乗り切るうなぎを食べる風習',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['うな丼','15分','易しい',[['うなぎの蒲焼（市販）','1尾',798,'鮮魚③'],['ご飯','2膳分',0,'自宅'],['山椒','少々',98,'調味料⑦'],['市販のうなぎのタレ','適量',148,'調味料⑦']],['うなぎをトースターで3分焼いて温める','器にご飯を盛りうなぎをのせる','タレをかけ山椒をふる','熱いうちに食べる']]]},
+{month:9,day:9,name:'重陽の節句',desc:'9月9日 ｜ 菊・栗を使った料理で長寿を願う',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['栗ごはん','50分','普通',[['栗（生または瓶）','200g',298,'野菜②または瓶詰⑧'],['米','2合',128,'米⑨'],['酒・塩','各適量',0,'自宅']],['生栗の場合は皮をむいて水にさらす30分','米を洗い浸水20分','炊飯器に米・栗・酒・塩を入れて炊飯','炊き上がったら混ぜて完成']]]},
+{month:11,day:11,name:'麺の日・チーズの日',desc:'11月11日 ｜ 1111が麺に見えることにちなむ',c:'#e6f1fb',tc:'#042c53',bc:'#85b7eb',
+recipes:[['カルボナーラ','20分','普通',[['スパゲッティ','160g',148,'麺類⑧'],['ベーコン','4枚',168,'加工肉⑩'],['卵','2個',58,'卵⑥'],['パルメザンチーズ・黒こしょう','各適量',198,'乳製品⑥']],['スパゲッティを茹でる','ベーコンをフライパンで炒める','卵とチーズを混ぜてソースを作る','パスタを加えて余熱で和え黒こしょうをふる']]]},
+{month:12,day:22,name:'冬至・かぼちゃの日',desc:'12月22日頃 ｜ かぼちゃとゆず湯で冬の健康を願う',c:'#faeeda',tc:'#412402',bc:'#ef9f27',
+recipes:[['かぼちゃの煮物','30分','易しい',[['かぼちゃ','1/4個',148,'野菜②'],['砂糖・醤油・みりん','各大さじ2',0,'自宅']],['かぼちゃを3cm角に切り面取りをする','鍋に皮目を下にして並べる','砂糖・醤油・みりん・水を加えて中火','沸いたら落とし蓋をして弱火で15分煮て完成']]]}
+];
+
+var currentIsKn=false, currentKinenbi=null;
+
+function show(id){
+  document.querySelectorAll('.sc').forEach(function(s){s.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function buildUpcoming(){
+  var items=[];
+  var y=TODAY.getFullYear(), m=TODAY.getMonth()+1, d=TODAY.getDate();
+  for(var mo=0;mo<3;mo++){
+    var nm=m+mo; var ny=y; if(nm>12){nm-=12;ny++;}
+    MONTHLY.forEach(function(k){
+      var dt=new Date(ny,nm-1,k.day);
+      var diff=Math.round((dt-TODAY)/86400000);
+      if(diff>=0&&diff<=90) items.push({dt:dt,diff:diff,k:k});
+    });
+  }
+  ANNUAL.forEach(function(k){
+    var dt=new Date(y,k.month-1,k.day);
+    if(dt<TODAY) dt=new Date(y+1,k.month-1,k.day);
+    var diff=Math.round((dt-TODAY)/86400000);
+    items.push({dt:dt,diff:diff,k:k});
+  });
+  items.sort(function(a,b){return a.dt-b.dt;});
+  return items;
+}
+
+function goKn(){
+  var items=buildUpcoming();
+  var ul=document.getElementById('knlist');
+  ul.innerHTML='';
+  items.forEach(function(item){
+    var k=item.k;
+    var isToday=item.diff===0;
+    var dateStr=isToday?'今日':(item.diff===1?'明日':item.diff+'日後（'+(item.dt.getMonth()+1)+'/'+(item.dt.getDate())+'）');
+    var li=document.createElement('li');
+    li.className=isToday?'today':'';
+    li.innerHTML='<div><div class="knd" style="color:'+k.tc+';">'+dateStr+(isToday?'<span class="today-badge">今日</span>':'')+'</div><div class="knt">'+k.name+'</div><div class="kns">'+k.desc+'</div></div><i class="ti ti-chevron-right" style="color:#aaa;" aria-hidden="true"></i>';
+    li.onclick=(function(kk){return function(){openKn(kk);};})(k);
+    ul.appendChild(li);
+  });
+  show('s4');
+}
+
+function openKn(k){
+  currentKinenbi=k; currentIsKn=true;
+  renderList(k.recipes,'kinenbi',k.name,k.c,k.tc,'s4');
+  show('s2');
+}
+
+function go(mode){
+  currentIsKn=false; currentKinenbi=null;
+  var mconf={speed:{label:'パパっとモード',bg:'#e6f1fb',tc:'#185fa5'},medium:{label:'ちょっと本格モード',bg:'#e1f5ee',tc:'#0f6e56'},slow:{label:'じっくりモード',bg:'#faeeda',tc:'#854f0b'}};
+  var mc=mconf[mode];
+  renderList(RDB[mode],mode,mc.label,mc.bg,mc.tc,'s1');
+  show('s2');
+}
+
+var currentRecipes=[], currentBackScreen='s1';
+
+function renderList(recipes,mode,label,bg,tc,backSc){
+  currentRecipes=recipes; currentBackScreen=backSc||'s1';
+  document.getElementById('s2t').textContent=label;
+  var tag=document.getElementById('s2tag');
+  tag.textContent=label; tag.style.background=bg; tag.style.color=tc;
+  document.getElementById('s2cnt').textContent=recipes.length+'品';
+  var ul=document.getElementById('rlist'); ul.innerHTML='';
+  recipes.forEach(function(r,i){
+    var li=document.createElement('li');
+    li.innerHTML='<div><div class="rn">'+r[0]+'</div><div class="rm">'+r[1]+'　難易度：'+r[2]+'</div></div><i class="ti ti-chevron-right" style="color:#aaa;" aria-hidden="true"></i>';
+    li.onclick=(function(idx){return function(){openDetail(currentRecipes,idx);};})(i);
+    ul.appendChild(li);
+  });
+}
+
+function openDetail(recipes,idx){
+  var r=recipes[idx];
+  document.getElementById('dn').textContent=r[0];
+  document.getElementById('dt').textContent=r[1];
+  document.getElementById('dd').textContent=r[2];
+  var kf=document.getElementById('kn-flag2');
+  if(currentIsKn&&currentKinenbi){kf.style.display='flex';document.getElementById('kn-flag2-txt').textContent='今日は「'+currentKinenbi.name+'」にちなんだ献立です';}
+  else{kf.style.display='none';}
+  var hasSale=false,total=0,html='';
+  r[3].forEach(function(i){
+    if(i[4])hasSale=true; total+=i[2];
+    html+='<tr><td>'+(i[4]?'<span class="sd" title="特売品"></span>':'')+i[0]+'</td><td class="iq">'+i[1]+'</td><td class="il">'+(i[3]!=='自宅'?'<span class="loc">'+i[3]+'</span>':'<span style="font-size:11px;color:#888;">自宅</span>')+'</td></tr>';
+  });
+  document.getElementById('itb').innerHTML=html;
+  document.getElementById('salenote').style.display=hasSale?'flex':'none';
+  document.getElementById('totv').textContent=total>0?'¥'+total+'前後':'';
+  var sh=''; r[4].forEach(function(s,i){sh+='<li class="sl"><div class="sn">'+(i+1)+'</div><span>'+s+'</span></li>';});
+  document.getElementById('slb').innerHTML=sh;
+  document.getElementById('s3t').textContent=r[0];
+  stab(0); show('s3');
+}
+
+function stab(n){
+  [0,1].forEach(function(i){
+    document.getElementById('tb'+i).className='tab'+(i===n?' on':'');
+    document.getElementById('p'+i).className='panel'+(i===n?' on':'');
+  });
+}
+
+// Init: 今日の記念日バナー
+(function(){
+  var items=buildUpcoming();
+  if(items.length>0){
+    var first=items[0];
+    document.getElementById('kn-top-title').textContent=(first.diff===0?'今日は「'+first.k.name+'」':first.diff+'日後：'+first.k.name);
+    document.getElementById('kn-top-sub').textContent=first.k.desc;
+  }
+})();
+</script>
+</body>
+</html>
