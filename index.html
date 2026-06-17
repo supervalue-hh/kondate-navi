@@ -435,29 +435,23 @@ function filter() {
   var sc = sel.scene ? sel.scene.val : null;
   var fl = sel.flavor ? sel.flavor.val : null;
   var di = sel.diff ? sel.diff.val : null;
-  var strict = RDB.filter(function(r) {
+  function match(r, useMood, useFlavor, useDiff) {
     if (t && r[5] !== t) return false;
-    if (m && r[6].indexOf(m) < 0) return false;
     if (sc && r[7] !== sc) return false;
-    if (fl && r[8] !== fl) return false;
-    if (di && r[9] !== di) return false;
+    if (useMood && m && r[6].indexOf(m) < 0) return false;
+    if (useFlavor && fl && r[8] !== fl) return false;
+    if (useDiff && di && r[9] !== di) return false;
     return true;
-  });
-  if (strict.length >= 2) return strict.slice(0, 5);
-  var relax1 = RDB.filter(function(r) {
-    if (t && r[5] !== t) return false;
-    if (m && r[6].indexOf(m) < 0) return false;
-    if (fl && r[8] !== fl) return false;
-    return true;
-  });
-  if (relax1.length >= 2) return relax1.slice(0, 5);
-  var relax2 = RDB.filter(function(r) {
-    if (t && r[5] !== t) return false;
-    if (fl && r[8] !== fl) return false;
-    return true;
-  });
-  if (relax2.length >= 2) return relax2.slice(0, 5);
-  return RDB.filter(function(r){ return !t || r[5] === t; }).slice(0, 5);
+  }
+  var r1 = RDB.filter(function(r){ return match(r,true,true,true); });
+  if (r1.length >= 2) return r1.slice(0,5);
+  var r2 = RDB.filter(function(r){ return match(r,true,true,false); });
+  if (r2.length >= 2) return r2.slice(0,5);
+  var r3 = RDB.filter(function(r){ return match(r,false,true,false); });
+  if (r3.length >= 2) return r3.slice(0,5);
+  var r4 = RDB.filter(function(r){ return match(r,false,false,false); });
+  if (r4.length >= 2) return r4.slice(0,5);
+  return RDB.filter(function(r){ return !sc || r[7]===sc; }).slice(0,5);
 }
 
 function openDetail(r, isKn, kn) {
