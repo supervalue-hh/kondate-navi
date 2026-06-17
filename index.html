@@ -129,6 +129,15 @@ body {
       <div class="ch" onclick="pick('time','medium','少しなら')"><div class="ci">少しなら手間かけてもいい</div><div class="cs">20〜30分</div></div>
       <div class="ch" onclick="pick('time','slow','じっくり')"><div class="ci">じっくり手間かけてもいい</div><div class="cs">40分〜</div></div>
     </div>
+    <div style="padding:0 18px 14px;">
+      <div onclick="pickRandom()" style="border:0.5px dashed #1a7a4a;border-radius:12px;padding:13px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:#f4fbf7;transition:background .12s;" onmouseover="this.style.background='#e6f5ec'" onmouseout="this.style.background='#f4fbf7'">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:#1a7a4a;">🎲 おまかせで決める</div>
+          <div style="font-size:11px;color:#555;margin-top:3px;">全部まとめてランダムで提案します</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:#1a7a4a;" aria-hidden="true"></i>
+      </div>
+    </div>
     <div class="kn-section">
       <div class="kn-section-hd">
         <span class="kn-section-lbl">食の記念日（直近3日間）</span>
@@ -222,6 +231,7 @@ body {
       <div class="dm">
         <span><i class="ti ti-clock" style="font-size:13px;" aria-hidden="true"></i><span id="dt"></span></span>
         <span><i class="ti ti-chart-bar" style="font-size:13px;" aria-hidden="true"></i><span id="dd"></span></span>
+        <span><i class="ti ti-users" style="font-size:13px;" aria-hidden="true"></i><span id="dserve"></span></span>
       </div>
     </div>
     <div class="tabs">
@@ -533,6 +543,32 @@ function updateProg() {
   });
 }
 
+function pickRandom() {
+  var times = ['speed','medium','slow'];
+  var tLabels = ['パパっと','少しなら','じっくり'];
+  var moods = ['tired','energetic','warm','healthy'];
+  var mLabels = ['疲れてる','元気いっぱい','体を温めたい','ヘルシーに'];
+  var scenes = ['self','family','guest'];
+  var sLabels = ['自分だけ','家族で','お客様に'];
+  var flavors = ['j','w','c'];
+  var fLabels = ['和風','洋風','中華・アジア'];
+  var diffs = ['easy','normal','hard'];
+  var dLabels = ['簡単に','普通に','腕を振るう'];
+  var ti = Math.floor(Math.random()*3);
+  var mi = Math.floor(Math.random()*4);
+  var si = Math.floor(Math.random()*3);
+  var fi = Math.floor(Math.random()*3);
+  var di = Math.floor(Math.random()*3);
+  sel = {
+    time:{val:times[ti],label:tLabels[ti]},
+    mood:{val:moods[mi],label:mLabels[mi]},
+    scene:{val:scenes[si],label:sLabels[si]},
+    flavor:{val:flavors[fi],label:fLabels[fi]},
+    diff:{val:diffs[di],label:dLabels[di]}
+  };
+  showResults();
+}
+
 function showResults() {
   var results = filter();
   var tagHtml = '';
@@ -591,6 +627,8 @@ function openDetail(r, isKn, kn) {
   document.getElementById('dn').textContent = r[0];
   document.getElementById('dt').textContent = r[1];
   document.getElementById('dd').textContent = r[2];
+  var serveMap = {self:'1〜2人分', family:'3〜4人分', guest:'3〜5人分'};
+  document.getElementById('dserve').textContent = serveMap[r[7]] || '';
   var kf = document.getElementById('kn-flag2');
   if (isKn && kn) {
     kf.style.display = 'flex';
