@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>今日のごはん、何にする？</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -243,6 +244,10 @@ body {
     </div>
     <div class="panel" id="p1">
       <ol class="sl" id="slb"></ol>
+    </div>
+    <div style="margin-top:20px;padding:16px;background:#f4fbf7;border-radius:12px;text-align:center;">
+      <div style="font-size:12px;color:#555;margin-bottom:10px;"><i class="ti ti-qrcode" aria-hidden="true"></i> スマホでレシピを検索</div>
+      <div id="qrbox" style="display:inline-block;"></div>
     </div>
   </div>
 </div>
@@ -632,6 +637,14 @@ function openDetail(r, isKn, kn) {
   document.getElementById('dd').textContent = r[2];
   var serveMap = {self:'1〜2人分', family:'3〜4人分', guest:'3〜5人分'};
   document.getElementById('dserve').textContent = serveMap[r[7]] || '';
+  var qrbox = document.getElementById('qrbox');
+  qrbox.innerHTML = '';
+  new QRCode(qrbox, {
+    text: 'https://www.google.com/search?q=' + encodeURIComponent(r[0] + ' レシピ'),
+    width: 160, height: 160,
+    colorDark: '#1a7a4a', colorLight: '#f4fbf7',
+    correctLevel: QRCode.CorrectLevel.M
+  });
   var kf = document.getElementById('kn-flag2');
   if (isKn && kn) {
     kf.style.display = 'flex';
