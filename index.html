@@ -566,7 +566,10 @@ function pickRandom() {
     flavor:{val:flavors[fi],label:fLabels[fi]},
     diff:{val:diffs[di],label:dLabels[di]}
   };
-  showResults();
+  var pool = filter();
+  if (pool.length === 0) pool = RDB;
+  var picked = pool[Math.floor(Math.random() * pool.length)];
+  openDetail(picked, false, null);
 }
 
 function showResults() {
