@@ -230,8 +230,6 @@ body {
     </div>
     <div class="panel on" id="p0">
       <table class="it"><tbody id="itb"></tbody></table>
-      <div class="sale-note" id="salenote" style="display:none;"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#1a7a4a;margin-right:4px;"></span> 本日の特売品</div>
-      <div class="tot"><span style="font-size:13px;color:#888;">目安合計（税込）</span><span class="totv" id="totv"></span></div>
     </div>
     <div class="panel" id="p1">
       <ol class="sl" id="slb"></ol>
@@ -600,15 +598,11 @@ function openDetail(r, isKn, kn) {
   } else {
     kf.style.display = 'none';
   }
-  var hasSale = false, total = 0, html = '';
+  var html = '';
   r[3].forEach(function(ing) {
-    if (ing[4]) hasSale = true;
-    total += ing[2];
-    html += '<tr><td>' + (ing[4] ? '<span class="sd"></span>' : '') + ing[0] + '</td><td class="iq">' + ing[1] + '</td><td class="il">' + (ing[3] !== '自宅' ? '<span class="loc">' + ing[3] + '</span>' : '<span style="font-size:11px;color:#aaa;">自宅</span>') + '</td></tr>';
+    html += '<tr><td>' + ing[0] + '</td><td class="iq">' + ing[1] + '</td><td class="il">' + (ing[3] !== '自宅' ? '<span class="loc">' + ing[3] + '</span>' : '<span style="font-size:11px;color:#aaa;">自宅</span>') + '</td></tr>';
   });
   document.getElementById('itb').innerHTML = html;
-  document.getElementById('salenote').style.display = hasSale ? 'flex' : 'none';
-  document.getElementById('totv').textContent = total > 0 ? '¥' + total + '前後' : '';
   var sh = '';
   r[4].forEach(function(s, i) { sh += '<li class="sl"><div class="sn">' + (i + 1) + '</div><span>' + s + '</span></li>'; });
   document.getElementById('slb').innerHTML = sh;
